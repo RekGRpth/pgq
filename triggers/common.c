@@ -224,9 +224,7 @@ static void init_cache(void)
 	 */
 	tbl_cache_ctx = AllocSetContextCreate(TopMemoryContext,
 					      "pgq_triggers table info",
-					      ALLOCSET_SMALL_MINSIZE,
-					      ALLOCSET_SMALL_INITSIZE,
-					      ALLOCSET_SMALL_MAXSIZE);
+					      ALLOCSET_SMALL_SIZES);
 
 	/*
 	 * init pkey cache.
