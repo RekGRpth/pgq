@@ -183,7 +183,7 @@ static void pgq_jsonenc_row(PgqTriggerEvent *ev, HeapTuple row, StringInfo buf)
 		appendStringInfoChar(buf, ':');
 
 		/* quote column value */
-		col_type = tupdesc->attrs[i]->atttypid;
+		col_type = tupdesc->attrs[i].atttypid;
 		col_datum = SPI_getbinval(row, tupdesc, i + 1, &isnull);
 		col_value = NULL;
 		if (isnull) {

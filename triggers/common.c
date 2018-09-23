@@ -129,7 +129,7 @@ static void fill_magic_columns(PgqTriggerEvent *ev)
 		/* Skip dropped columns */
 		if (tupdesc->attrs[i].attisdropped)
 			continue;
-		col_name = NameStr(tupdesc->attrs[i]->attname);
+		col_name = NameStr(tupdesc->attrs[i].attname);
 		if (!is_magic_field(col_name))
 			continue;
 		if (strcmp(col_name, "_pgq_ev_type") == 0)
@@ -626,7 +626,7 @@ bool pgqtriga_skip_col(PgqTriggerEvent *ev, int i, int attkind_idx)
 	tupdesc = tg->tg_relation->rd_att;
 	if (tupdesc->attrs[i].attisdropped)
 		return true;
-	name = NameStr(tupdesc->attrs[i]->attname);
+	name = NameStr(tupdesc->attrs[i].attname);
 
 	if (is_magic_field(name)) {
 		ev->tgargs->custom_fields = 1;
@@ -660,7 +660,7 @@ bool pgqtriga_is_pkey(PgqTriggerEvent *ev, int i, int attkind_idx)
 		tupdesc = tg->tg_relation->rd_att;
 		if (tupdesc->attrs[i].attisdropped)
 			return false;
-		name = NameStr(tupdesc->attrs[i]->attname);
+		name = NameStr(tupdesc->attrs[i].attname);
 		if (is_magic_field(name)) {
 			ev->tgargs->custom_fields = 1;
 			return false;
