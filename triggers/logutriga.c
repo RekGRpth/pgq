@@ -43,7 +43,7 @@ void pgq_urlenc_row(PgqTriggerEvent *ev, HeapTuple row, StringInfo buf)
 
 	for (i = 0; i < tg->tg_relation->rd_att->natts; i++) {
 		/* Skip dropped columns */
-		if (tupdesc->attrs[i]->attisdropped)
+		if (tupdesc->attrs[i].attisdropped)
 			continue;
 
 		attkind_idx++;
