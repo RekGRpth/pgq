@@ -40,7 +40,7 @@ EXTRA_CLEAN += $(call IfExt,$(Contrib_data_built),$(Extension_data_built)) test.
 
 # have deterministic dbname for regtest database
 override CONTRIB_TESTDB = regression
-REGRESS_OPTS = --load-language=plpgsql --dbname=$(CONTRIB_TESTDB)
+REGRESS_OPTS = --dbname=$(CONTRIB_TESTDB)
 
 #
 # Calculate actual sql files
@@ -62,7 +62,7 @@ include $(PGXS)
 
 # when compiling locally and with postgres without python,
 # the variable may be empty
-PYTHON := $(if $(PYTHON),$(PYTHON),python)
+PYTHON3 := $(if $(PYTHON3),$(PYTHON3),python3)
 
 #
 # common tools
@@ -70,8 +70,8 @@ PYTHON := $(if $(PYTHON),$(PYTHON),python)
 
 NDOC = NaturalDocs
 NDOCARGS = -r -o html docs/html -p docs -i docs/sql
-CATSQL = $(PYTHON) mk/catsql.py
-GRANTFU = $(PYTHON) mk/grantfu.py
+CATSQL = $(PYTHON3) mk/catsql.py
+GRANTFU = $(PYTHON3) mk/grantfu.py
 
 #
 # build rules, in case Contrib data must be always installed
@@ -98,6 +98,9 @@ endif
 test: install
 	$(MAKE) installcheck || { filterdiff --format=unified regression.diffs | less; exit 1; }
 	pg_dump regression > test.dump
+
+citest: checkver
+	$(MAKE) installcheck || { filterdiff --format=unified regression.diffs; exit 1; }
 
 ack:
 	cp results/*.out expected/
@@ -138,4 +141,24 @@ structure/oldgrants_$(EXTENSION).sql: structure/grants.ini structure/grants.sql
 	$(GRANTFU) -R -o $< >> $@
 	cat structure/grants.sql >> $@
 	echo "commit;" >> $@
+
+checkver:
+	@echo "Checking version numbers"
+	@grep -q "^default_version *= *'$(EXT_VERSION)'" $(EXTENSION).control \
+		|| { echo "ERROR: $(EXTENSION).control has wrong version"; exit 1; }
+	@test -f "docs/notes/v$(EXT_VERSION).md" \
+		|| { echo "ERROR: notes missing: docs/notes/v$(EXT_VERSION).md"; exit 1; }
+	@head debian/changelog | grep -q "[(]$(EXT_VERSION)-" debian/changelog \
+		|| { echo "ERROR: debian/changelog has wrong version"; exit 1; }
+
+all: checkver
+
+TARNAME = $(EXTENSION)-$(EXT_VERSION)
+dist: checkver
+	git archive --format=tar.gz --prefix=$(TARNAME)/ -o $(TARNAME).tar.gz HEAD
+
+release: checkver
+	git tag v$(EXT_VERSION)
+	git push github
+	git push github --tag
 
