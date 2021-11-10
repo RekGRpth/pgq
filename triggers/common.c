@@ -429,7 +429,7 @@ static struct PgqTableInfo *find_table_info(Relation rel)
 
 static struct PgqTriggerInfo *find_trigger_info(struct PgqTableInfo *info, Oid tgoid, bool create)
 {
-	struct PgqTriggerInfo *tgargs = info->tg_cache;
+	struct PgqTriggerInfo *tgargs;
 	for (tgargs = info->tg_cache; tgargs; tgargs = tgargs->next) {
 		if (tgargs->tgoid == tgoid)
 			return tgargs;
@@ -506,7 +506,6 @@ static void parse_oldstyle_args(PgqTriggerEvent *ev, TriggerData *tg)
 	/*
 	 * Count number of active columns
 	 */
-	tupdesc = tg->tg_relation->rd_att;
 	for (i = 0, attcnt = 0; i < tupdesc->natts; i++) {
 		if (!TupleDescAttr(tupdesc, i)->attisdropped)
 			attcnt++;
@@ -808,13 +807,13 @@ static void override_fields(struct PgqTriggerEvent *ev)
 		if (i == EV_WHEN) {
 			bool isnull;
 			Oid oid = SPI_gettypeid(SPI_tuptable->tupdesc, 1);
-			Datum res;
+			Datum result;
 			if (oid != BOOLOID)
 				elog(ERROR, "when= query result must be boolean, got=%u", oid);
-			res = SPI_getbinval(SPI_tuptable->vals[0], SPI_tuptable->tupdesc, 1, &isnull);
+			result = SPI_getbinval(SPI_tuptable->vals[0], SPI_tuptable->tupdesc, 1, &isnull);
 			if (isnull)
 				elog(ERROR, "when= should not be NULL");
-			if (DatumGetBool(res) == 0)
+			if (DatumGetBool(result) == 0)
 				ev->skip_event = true;
 			continue;
 		}
