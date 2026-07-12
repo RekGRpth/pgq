@@ -11,7 +11,9 @@ name: CI
 
 on:
   pull_request: {}
-  push: {}
+  push:
+    braches:
+      - master
 
 jobs:
 
@@ -33,10 +35,11 @@ jobs:
           - {pgver: "16", os: "ubuntu-22.04", "repo": "pgdg"}
           - {pgver: "17", os: "ubuntu-24.04", "repo": "pgdg"}
           - {pgver: "18", os: "ubuntu-24.04", "repo": "pgdg"}
+          - {pgver: "19", os: "ubuntu-latest", "repo": "pgdg"}
           - {pgver: "18", os: "macos-latest"}
     steps:
       - name: "Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "InstallDB / Linux"
         if: ${{runner.os == 'Linux'}}
@@ -111,7 +114,7 @@ jobs:
           - {os: "windows-latest", arch: "x86_64", mingw: "mingw64", bits: "64"}
     steps:
       - name: "Checkout"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: "Setup MSYS"
         shell: cmd
